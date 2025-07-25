@@ -36,9 +36,6 @@ class UserServiceTest {
         // when
         User result = userService.create(request);
 
-        System.out.println("여어어어기 ----> "+result.getId());
-        System.out.println("여어어어기 ----> "+result.getName());
-
         // then
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
