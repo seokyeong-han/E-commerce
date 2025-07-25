@@ -16,4 +16,9 @@ public class UserService {
     public User create(UserCreateRequest request) {
         return userRepository.save(request.toEntity());
     }
+
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
 }
