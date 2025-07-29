@@ -1,9 +1,13 @@
 package com.example.ecommerce.user.application.dto;
 
 import com.example.ecommerce.user.domain.model.User;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
+@Getter
+@NoArgsConstructor
 public class UserCreateResponse {
     private Long id;
     private String name;
