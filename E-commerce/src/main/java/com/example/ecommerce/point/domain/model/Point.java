@@ -1,5 +1,6 @@
 package com.example.ecommerce.point.domain.model;
 
+import com.example.ecommerce.user.domain.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +15,14 @@ import java.time.LocalDateTime;
 public class Point {
     private Long id;
     private Long userId;
-    private int balance;
+    private Long balance;
     private LocalDateTime credateAt;
     private LocalDateTime updatedAt;
+
+    public Point(User user) {
+        this.userId = user.getId();
+        this.balance = 0L;
+    }
 
     public void earn(int amount) {
         if (amount <= 0) throw new IllegalArgumentException("충전 금액은 0보다 커야 합니다.");
