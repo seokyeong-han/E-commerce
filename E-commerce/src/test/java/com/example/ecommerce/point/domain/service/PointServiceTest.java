@@ -6,14 +6,17 @@ import com.example.ecommerce.point.domain.model.PointType;
 import com.example.ecommerce.point.domain.repository.PointHistoryRepository;
 import com.example.ecommerce.point.domain.repository.PointRepository;
 import com.example.ecommerce.user.domain.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 class PointServiceTest {
@@ -58,5 +61,38 @@ class PointServiceTest {
 
     }
 
+    @Test
+    void 유저포인트조회_성공(){
+        // given
+        User user = new User(1L, "testUser", LocalDateTime.now(),LocalDateTime.now());
+        Point point = Point.builder()
+                .id(1L)
+                .userId(user.getId())
+                .balance(1000L)
+                .build();
+        // Mock repository가 userId로 조회했을 때 point를 반환하도록 설정
+        given(pointRepository.findByUserId(user.getId()))
+                .willReturn(Optional.of(point));
+        // when
+        Point result = pointService.getUserPints(user.getId());
+        // then
+        assertNotNull(result);
+        assertEquals(1000L, result.getBalance());
+        assertEquals(user.getId(), result.getUserId());
+    }
+
+    @Test
+    void 유저포인트조회_실패_데이터없음() {
+        // given
+        Long userId = 2L;
+        given(pointRepository.findByUserId(userId)).willReturn(Optional.empty());
+
+        // when & then
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> pointService.getUserPints(userId)
+        );
+        assertTrue(exception.getMessage().contains("포인트가 없습니다. userId=" + userId));
+    }
 
 }
