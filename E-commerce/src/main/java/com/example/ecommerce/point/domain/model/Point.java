@@ -16,7 +16,7 @@ public class Point {
     private Long id;
     private Long userId;
     private Long balance;
-    private LocalDateTime credateAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Point(User user) {

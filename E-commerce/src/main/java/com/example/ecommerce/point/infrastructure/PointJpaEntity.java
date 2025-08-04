@@ -47,7 +47,7 @@ public class PointJpaEntity {
                 .userId(userId)
                 .balance(balance)
                 .updatedAt(updatedAt)
-                .credateAt(createdAt)
+                .createdAt(createdAt)
                 .build();
     }
 
@@ -56,8 +56,8 @@ public class PointJpaEntity {
                 .id(point.getId())
                 .userId(point.getUserId())
                 .balance(point.getBalance())
-                .createdAt(point.getCredateAt())
-                .updatedAt(point.getCredateAt())
+                .createdAt(point.getCreatedAt())
+                .updatedAt(point.getUpdatedAt())
                 .build();
     }
 }

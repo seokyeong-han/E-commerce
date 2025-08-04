@@ -1,6 +1,7 @@
 package com.example.ecommerce.point.application.controller;
 
 import com.example.ecommerce.point.application.dto.UserPointResponse;
+import com.example.ecommerce.point.application.facade.PointFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +11,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("api/points")
 public class PointController {
+    private PointFacade pointFacade;
+
+    public PointController(PointFacade pointFacade) {
+        this.pointFacade = pointFacade;
+    }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserPointResponse> getPoint(@PathVariable Long userId){
-        UserPointResponse res = null;
+    public ResponseEntity<UserPointResponse> getUserPoints(@PathVariable Long userId){
+        UserPointResponse res = pointFacade.getUserPoints(userId);
         return ResponseEntity.ok(res);
     }
 }

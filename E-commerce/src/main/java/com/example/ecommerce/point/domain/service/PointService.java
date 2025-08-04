@@ -6,7 +6,10 @@ import com.example.ecommerce.point.domain.model.PointType;
 import com.example.ecommerce.point.domain.repository.PointHistoryRepository;
 import com.example.ecommerce.point.domain.repository.PointRepository;
 import com.example.ecommerce.user.domain.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class PointService {
@@ -30,4 +33,8 @@ public class PointService {
         return point;
     }
 
+    public Point getUserPints(Long userId){
+        return pointRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("포인트가 없습니다. userId=" + userId));
+    }
 }
