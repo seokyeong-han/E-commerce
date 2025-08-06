@@ -24,7 +24,7 @@ public class Point {
         this.balance = 0L;
     }
 
-    public void earn(int amount) {
+    public void earn(Long amount) {
         if (amount <= 0) throw new IllegalArgumentException("충전 금액은 0보다 커야 합니다.");
         this.balance += amount;
     }

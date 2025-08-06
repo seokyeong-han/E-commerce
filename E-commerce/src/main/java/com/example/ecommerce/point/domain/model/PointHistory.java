@@ -25,8 +25,8 @@ public class PointHistory {
 
     private LocalDateTime createdAt;
 
-    public PointHistory(User user, Long amount, Long balanceAfter, PointType type) {
-        this.userId = user.getId();
+    public PointHistory(Long userId, Long amount, Long balanceAfter, PointType type) {
+        this.userId = userId;
         this.amount = amount;
         this.balanceAfter = balanceAfter;
         this.type = type;
