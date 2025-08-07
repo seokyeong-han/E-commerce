@@ -1,6 +1,7 @@
 package com.example.ecommerce.point.domain.service;
 
 import com.example.ecommerce.point.domain.model.Point;
+import com.example.ecommerce.point.domain.model.PointCommand;
 import com.example.ecommerce.point.domain.model.PointHistory;
 import com.example.ecommerce.point.domain.model.PointType;
 import com.example.ecommerce.point.domain.repository.PointHistoryRepository;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.example.ecommerce.point.domain.model.PointType.CHARGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -23,12 +25,14 @@ class PointServiceTest {
     private PointRepository pointRepository;
     private PointHistoryRepository pointHistoryRepository;
     private PointService pointService;
+    private PointHistoryService pointHistoryService;
 
     @BeforeEach
     void setUp() {
         pointRepository = mock(PointRepository.class);
         pointHistoryRepository = mock(PointHistoryRepository.class);
         pointService = new PointService(pointRepository, pointHistoryRepository);
+        pointHistoryService = new PointHistoryService(pointHistoryRepository);
     }
 
     @Test
@@ -93,6 +97,69 @@ class PointServiceTest {
                 () -> pointService.getUserPints(userId)
         );
         assertTrue(exception.getMessage().contains("포인트가 없습니다. userId=" + userId));
+    }
+
+    @Test
+    void 포인트_충전_성공(){
+        // given
+        User user = new User(1L, "testUser", LocalDateTime.now(),LocalDateTime.now());
+        Point point = Point.builder()
+                .id(1L)
+                .userId(user.getId())
+                .balance(1000L)
+                .build();
+
+        // mock: 포인트 조회
+        given(pointRepository.findByUserId(user.getId()))
+                .willReturn(Optional.of(point));
+
+        // mock: 포인트 저장 시, 저장된 객체 그대로 반환
+        given(pointRepository.save(any(Point.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        //충전
+        PointCommand.Charge command = new PointCommand.Charge(user.getId(), 100L);
+        Point chargePoint = pointService.charge(command);
+
+        //히스토리 저장
+        PointHistory savedPointHis = pointHistoryService.saveChargeHistory(chargePoint.getUserId(), 100L, chargePoint.getBalance());
+        given(pointHistoryRepository.save(any(PointHistory.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+
+        //point 검증
+        assertEquals(1100L, chargePoint.getBalance());
+        //pointHistory 검증
+        assertEquals(user.getId(), savedPointHis.getUserId());
+        assertEquals(100L, savedPointHis.getAmount());
+        assertEquals(CHARGE, savedPointHis.getType());
+    }
+
+    @Test
+    void 포인트_충전_실패_음수충전(){
+        // given
+        User user = new User(1L, "testUser", LocalDateTime.now(),LocalDateTime.now());
+        Point point = Point.builder()
+                .id(1L)
+                .userId(user.getId())
+                .balance(1000L)
+                .build();
+
+        // mock: 포인트 조회
+        given(pointRepository.findByUserId(user.getId()))
+                .willReturn(Optional.of(point));
+
+        // mock: 포인트 저장 시, 저장된 객체 그대로 반환
+        given(pointRepository.save(any(Point.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        //충전
+        PointCommand.Charge command = new PointCommand.Charge(user.getId(), -100L);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            pointService.charge(command);
+        });
+        assertEquals("충전 금액은 0보다 커야 합니다.", exception.getMessage());
     }
 
 }
