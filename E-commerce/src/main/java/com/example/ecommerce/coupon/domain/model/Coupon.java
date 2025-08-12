@@ -45,11 +45,36 @@ public class Coupon {
     }
 
     public static Coupon create(CouponCommand.Create command){
+        Long amount = 0L;
+        int rate = 0;
+
+        // 공통 검증
+        if (command.getTotalQuantity() == null || command.getTotalQuantity() <= 0)
+            throw new IllegalArgumentException("총 발급 수량은 1 이상이어야 합니다.");
+        if (command.getExpiredAt() == null)
+            throw new IllegalArgumentException("만료일시는 필수입니다.");
+
+        // 타입별 검증
+        if (command.getType() == DiscountType.FIXED) {
+            if (command.getDiscountAmount() == null || command.getDiscountAmount() <= 0)
+                throw new IllegalArgumentException("고정 할인 금액은 1 이상이어야 합니다.");
+            amount = command.getDiscountAmount();
+            rate = 0;
+
+        } else if (command.getType() == DiscountType.RATE) {
+            if (command.getDiscountRate() == null || command.getDiscountRate() <= 0 || command.getDiscountRate() > 100)
+                throw new IllegalArgumentException("할인 비율은 1~100 사이여야 합니다.");
+            rate = command.getDiscountRate();
+            amount = 0L;
+        } else {
+            throw new IllegalArgumentException("잘못된 할인 타입");
+        }
+
         return Coupon.builder()
                 .name(command.getName())
                 .type(command.getType())
-                .discountAmount(command.getDiscountAmount())
-                .discountRate(command.getDiscountRate())
+                .discountAmount(amount)
+                .discountRate(rate)
                 .totalQuantity(command.getTotalQuantity())
                 .issuedQuantity(0)
                 .expiredAt(command.getExpiredAt())
