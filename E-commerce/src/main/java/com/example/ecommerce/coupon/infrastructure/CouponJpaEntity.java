@@ -39,7 +39,10 @@ public class CouponJpaEntity {
     @Column(nullable = false)
     private Integer issuedQuantity;
 
-    @Column(name = "expired_at", nullable = false, updatable = false)
+    @Column(name = "active_from", nullable = false)
+    private LocalDateTime activeFrom;
+
+    @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
     @Column(name = "created_at", nullable = false)
@@ -59,6 +62,7 @@ public class CouponJpaEntity {
                 .discountRate(this.discountRate)
                 .totalQuantity(this.totalQuantity)
                 .issuedQuantity(this.issuedQuantity)
+                .activeFrom(this.activeFrom)
                 .expiredAt(this.expiredAt)
                 .createdAt(this.createdAt)
                 .build();
@@ -73,6 +77,7 @@ public class CouponJpaEntity {
                 .discountRate(coupon.getDiscountRate())
                 .totalQuantity(coupon.getTotalQuantity())
                 .issuedQuantity(coupon.getIssuedQuantity())
+                .activeFrom(coupon.getActiveFrom())
                 .expiredAt(coupon.getExpiredAt())
                 .createdAt(coupon.getCreatedAt())
                 .build();

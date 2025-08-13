@@ -21,8 +21,10 @@ public class Coupon {
     private int totalQuantity;         // 총 발급 가능 수량
     private int issuedQuantity;        // 현재까지 발급된 수량
 
-    private LocalDateTime createdAt;
-    private LocalDateTime expiredAt;
+    private LocalDateTime activeFrom;  // 발급 시작 시각
+    private LocalDateTime expiredAt;   // 발급 종료(만료) 시각
+
+    private LocalDateTime createdAt;   //쿠폰 생성 시각
 
     public boolean canIssue() {
         return issuedQuantity < totalQuantity;
@@ -30,12 +32,15 @@ public class Coupon {
 
     public void issue() {
         if (!canIssue()) throw new IllegalStateException("쿠폰 수량 초과");
-        if (isExpired()) throw new IllegalStateException("만료된 쿠폰입니다.");
+        if (isActiveNow()) throw new IllegalStateException("만료된 쿠폰입니다.");
         this.issuedQuantity++;
     }
 
-    public boolean isExpired() {
-        return expiredAt.isBefore(LocalDateTime.now());
+    public boolean isActiveNow() {
+        LocalDateTime now = LocalDateTime.now();
+        boolean started = (activeFrom == null) || !now.isBefore(activeFrom);
+        boolean notExpired = (expiredAt == null) || !now.isAfter(expiredAt);
+        return started && notExpired;
     }
 
     public Long calculateDiscount(Long totalPrice) {
@@ -51,8 +56,11 @@ public class Coupon {
         // 공통 검증
         if (command.getTotalQuantity() == null || command.getTotalQuantity() <= 0)
             throw new IllegalArgumentException("총 발급 수량은 1 이상이어야 합니다.");
-        if (command.getExpiredAt() == null)
-            throw new IllegalArgumentException("만료일시는 필수입니다.");
+
+        if (command.getExpiredAt() == null) throw new IllegalArgumentException("만료일시는 필수입니다.");
+        if (command.getActiveFrom() != null && command.getActiveFrom().isAfter(command.getExpiredAt()))
+            throw new IllegalArgumentException("발급 시작 시각은 만료 시각보다 이전이어야 합니다.");
+
 
         // 타입별 검증
         if (command.getType() == DiscountType.FIXED) {
@@ -77,6 +85,8 @@ public class Coupon {
                 .discountRate(rate)
                 .totalQuantity(command.getTotalQuantity())
                 .issuedQuantity(0)
+                .createdAt(command.getActiveFrom())
+                .activeFrom(command.getActiveFrom())
                 .expiredAt(command.getExpiredAt())
                 .build();
     }

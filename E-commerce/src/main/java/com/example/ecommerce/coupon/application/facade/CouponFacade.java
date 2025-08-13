@@ -25,9 +25,11 @@ public class CouponFacade {
                 req.getDiscountAmount(),
                 req.getDiscountRate(),
                 req.getTotalQuantity(),
+                req.getActiveFrom(),
                 req.getExpiredAt());
         //쿠폰생성
         Coupon coupon = couponService.createCoupon(command);
+
         //히스토리 저장
         return CreateCouponResponse.from(coupon);
     }

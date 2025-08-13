@@ -12,14 +12,16 @@ public class CouponCommand {
         private final Long discountAmount;
         private final Integer discountRate;
         private final Integer totalQuantity;
+        private final LocalDateTime activeFrom;
         private final LocalDateTime expiredAt;
 
-        public Create(String name, DiscountType type, Long discountAmount, Integer discountRate, Integer totalQuantity, LocalDateTime expiredAt) {
+        public Create(String name, DiscountType type, Long discountAmount, Integer discountRate, Integer totalQuantity, LocalDateTime activeFrom, LocalDateTime expiredAt) {
             this.name = name;
             this.type = type;
             this.discountAmount = discountAmount;
             this.discountRate = discountRate;
             this.totalQuantity = totalQuantity;
+            this.activeFrom = activeFrom;
             this.expiredAt = expiredAt;
         }
 

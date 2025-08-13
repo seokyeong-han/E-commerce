@@ -32,8 +32,15 @@ class CouponServiceTest {
     void 쿠폰_생성_성공_히스토리_기록() {
         // given
         var cmd = new CouponCommand.Create(
-                "웰컴쿠폰", DiscountType.FIXED, 1000L, null, 100, LocalDateTime.now().plusDays(30));
+                "웰컴쿠폰",
+                DiscountType.FIXED,
+                1000L,
+                null,
+                100,
+                LocalDateTime.now() ,
+                LocalDateTime.now().plusDays(30));
 
+        LocalDateTime from = LocalDateTime.now();
         /*
         given 으로 couponRepository저장할때 any(Coupon.class): 어떤 Coupon
         객체가 들어와도 매칭 .willAnswer(...)로 지정한 동작을 수행
@@ -50,6 +57,7 @@ class CouponServiceTest {
                             .totalQuantity(c.getTotalQuantity())
                             .issuedQuantity(c.getIssuedQuantity())
                             .createdAt(c.getCreatedAt())
+                            .activeFrom(c.getActiveFrom())
                             .expiredAt(c.getExpiredAt())
                             .build();
                 });
@@ -62,6 +70,7 @@ class CouponServiceTest {
         // then
         assertEquals(1L, saved.getId());
         assertEquals("웰컴쿠폰", saved.getName());
+        assertEquals(from, saved.getActiveFrom());
 
     }
 

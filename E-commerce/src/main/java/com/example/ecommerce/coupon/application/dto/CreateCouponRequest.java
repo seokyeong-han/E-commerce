@@ -21,6 +21,8 @@ public class CreateCouponRequest {
     private Integer discountRate;  // 비율
     @Schema(description = "총 발급 수량", example = "100")
     private Integer totalQuantity;
+    @Schema(description = "쿠폰 발급 시작 일시", example = "2025-12-30T23:00:00")
+    private LocalDateTime activeFrom;
     @Schema(description = "쿠폰 만료일시", example = "2025-12-31T23:59:59")
     private LocalDateTime expiredAt;
 }
