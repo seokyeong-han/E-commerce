@@ -17,12 +17,11 @@ public class UserCoupon {
     private boolean used;  //쿠폰 사용여부
     private LocalDateTime issuedAt;
 
-    public static UserCoupon issue(Long userId, Coupon coupon) {
+    public static UserCoupon issue(Long userId, Long couponId) {
         return UserCoupon.builder()
                 .userId(userId)
-                .couponId(coupon.getId())
+                .couponId(couponId)
                 .used(false)
-                .issuedAt(LocalDateTime.now())
                 .build();
     }
 }
