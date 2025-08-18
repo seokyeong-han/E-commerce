@@ -1,8 +1,8 @@
+name: e-commerce   # ← 스택/프로젝트 이름 고정
 version: "3.8"
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-dev
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
@@ -13,5 +13,16 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+  redis:
+    image: redis:7.2
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: [ "redis-server", "--appendonly", "no" ]  # 스냅샷/로그 저장 방지 옵션
 volumes:
   mysql-data:
+    name: e-commerce_mysql-data
+  redis-data:
+    name: e-commerce_redis-data
