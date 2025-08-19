@@ -3,7 +3,9 @@ package com.example.ecommerce.couponissue.domain.service;
 import com.example.ecommerce.coupon.domain.model.Coupon;
 import com.example.ecommerce.coupon.domain.repository.CouponRepository;
 import com.example.ecommerce.couponissue.domain.model.CouponIssueCommand;
+import com.example.ecommerce.couponissue.domain.model.CouponIssueHistory;
 import com.example.ecommerce.couponissue.domain.model.UserCoupon;
+import com.example.ecommerce.couponissue.domain.repository.CouponIssueHistoryRepository;
 import com.example.ecommerce.couponissue.domain.repository.UserCouponRepository;
 import jakarta.transaction.Transactional;
 import org.redisson.api.RLock;
@@ -17,13 +19,17 @@ public class CouponIssueService {
     private final RedissonClient redisson;
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final CouponIssueHistoryRepository couponIssueHistoryRepository;
 
-    public CouponIssueService(RedissonClient redisson
+    public CouponIssueService(
+            RedissonClient redisson
             , CouponRepository couponRepository
-            ,  UserCouponRepository userCouponRepository) {
+            ,  UserCouponRepository userCouponRepository
+            , CouponIssueHistoryRepository couponIssueHistoryRepository) {
         this.redisson = redisson;
         this.couponRepository = couponRepository;
         this.userCouponRepository = userCouponRepository;
+        this.couponIssueHistoryRepository = couponIssueHistoryRepository;
     }
 
     //선착순 쿠폰 발급
@@ -55,13 +61,21 @@ public class CouponIssueService {
             userCouponRepository.save(userCoupon);
 
             //유저 쿠폰 히스토리 생성
+            CouponIssueHistory history = CouponIssueHistory.issued(userId, couponId);
+            couponIssueHistoryRepository.save(history);
 
             //쿠폰 수량 수정
+            couponRepository.save(coupon);
 
+            return userCoupon;
         }catch (Exception ex){
-
+            Thread.currentThread().interrupt();             // (A)
+            throw new RuntimeException("락 획득 실패", ex);
+        } finally {
+            if (lock.isHeldByCurrentThread()) { //이미 락을 획득한 상태 -> 락을 해제해야함
+                lock.unlock();
+            }
         }
-        return null;
     }
 
 }
