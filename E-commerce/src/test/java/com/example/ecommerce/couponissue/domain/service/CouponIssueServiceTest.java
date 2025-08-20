@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class) //@Mock 필드들을 MockitoExtension이 자동 초기화
 class CouponIssueServiceTest {
@@ -92,6 +92,60 @@ class CouponIssueServiceTest {
                 , coupon.getIssuedQuantity());
     }
 
+    @Test
+    void 락_획득_실패면_예외() throws Exception {
+        Long couponId = 1L, userId = 10L;
 
+        when(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(false);
+
+        var command = new CouponIssueCommand.Issue(userId, couponId);
+
+        assertThrows(IllegalStateException.class, () -> service.issue(command));
+
+        // 저장 로직 전혀 안 타야 함
+        verify(userCouponRepository, never()).save(any());
+        verify(historyRepository, never()).save(any());
+        verify(couponRepository, never()).save(any());
+        // 락도 못 잡았으니 unlock 호출되지 않아야 함
+        verify(rLock, never()).unlock();
+    }
+
+    @Test
+    void 재고_이미_소진된_쿠폰이면_issue에서_실패하고_언락() throws Exception {
+        Long couponId = 1L, userId = 10L;
+
+        // 총량 1로 생성
+        var cmd = new CouponCommand.Create(
+                "소진쿠폰", DiscountType.FIXED, 1000L, null,
+                1, // 총량 1
+                LocalDateTime.now(), LocalDateTime.now().plusDays(30)
+        );
+        Coupon coupon = Coupon.create(cmd);
+
+        // 사전 발급 1회로 소진 상태 만들기
+        coupon.issue(); // issuedQuantity == 1 이 되어 소진
+
+        // 락 스텁
+        when(redisson.getLock(anyString())).thenReturn(rLock);
+        when(rLock.tryLock(anyLong(), anyLong(), any(TimeUnit.class))).thenReturn(true);
+        when(rLock.isHeldByCurrentThread()).thenReturn(true);
+
+        // 레포 스텁
+        when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+
+        var command = new CouponIssueCommand.Issue(userId, couponId);
+
+        // 도메인 issue()에서 예외 → 서비스에서 RuntimeException으로 래핑될 수 있음
+        assertThrows(RuntimeException.class, () -> service.issue(command));
+
+        // 저장류 호출 안 됨
+        verify(userCouponRepository, never()).save(any());
+        verify(historyRepository, never()).save(any());
+        // 재고 소진으로 실패했으니 couponRepository.save도 안 타야 정상
+        verify(couponRepository, never()).save(any());
+
+        // 락은 잡았으니 반드시 해제
+        verify(rLock, times(1)).unlock();
+    }
 
 }

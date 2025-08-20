@@ -68,9 +68,9 @@ public class CouponIssueService {
             couponRepository.save(coupon);
 
             return userCoupon;
-        }catch (Exception ex){
-            Thread.currentThread().interrupt();             // (A)
-            throw new RuntimeException("락 획득 실패", ex);
+        }catch (InterruptedException ex){
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("락 획득 중 인터럽트 발생", ex);
         } finally {
             if (lock.isHeldByCurrentThread()) { //이미 락을 획득한 상태 -> 락을 해제해야함
                 lock.unlock();
