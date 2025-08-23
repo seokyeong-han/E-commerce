@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_coupons")
+@Table(name = "user_coupon",
+        uniqueConstraints = @UniqueConstraint(name = "uk_user_coupon", columnNames = {"coupon_id","user_id"}))
 public class UserCouponJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
