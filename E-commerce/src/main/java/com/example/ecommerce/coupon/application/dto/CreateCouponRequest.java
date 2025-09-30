@@ -2,13 +2,13 @@ package com.example.ecommerce.coupon.application.dto;
 
 import com.example.ecommerce.coupon.domain.model.DiscountType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
-@NoArgsConstructor
+@Builder
 @Schema(description = "쿠폰 생성 요청 DTO")
 public class CreateCouponRequest {
     @Schema(description = "쿠폰명", example = "웰컴쿠폰")

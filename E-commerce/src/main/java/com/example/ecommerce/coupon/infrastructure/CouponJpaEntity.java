@@ -10,10 +10,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity(name = "coupon")
 @Table(name = "coupon")
 public class CouponJpaEntity {
     @Id
