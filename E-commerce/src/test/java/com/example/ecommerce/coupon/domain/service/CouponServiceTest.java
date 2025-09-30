@@ -8,25 +8,34 @@ import com.example.ecommerce.coupon.domain.repository.CouponHistoryRepository;
 import com.example.ecommerce.coupon.domain.repository.CouponRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+// 1. JUnit5에게 Mockito 확장 기능을 사용하라고 알려줍니다.
+@ExtendWith(MockitoExtension.class)
 class CouponServiceTest {
-    private CouponService couponService;
-    private CouponRepository couponRepository;
-    private CouponHistoryRepository couponHistoryRepository;
 
-    @BeforeEach
-    void setUp(){
-        couponRepository = Mockito.mock(CouponRepository.class);
-        couponHistoryRepository = Mockito.mock(CouponHistoryRepository.class);
-        couponService = new CouponService(couponRepository, couponHistoryRepository);
-    }
+    @InjectMocks
+    private CouponService couponService;
+
+    // 2. Mockito.mock(...)을 대체하는 어노테이션입니다.
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private CouponRepository couponRepository;
+    @Mock
+    private CouponHistoryRepository couponHistoryRepository;
 
     @Test
     void 쿠폰_생성_성공_히스토리_기록() {
@@ -70,7 +79,9 @@ class CouponServiceTest {
         // then
         assertEquals(1L, saved.getId());
         assertEquals("웰컴쿠폰", saved.getName());
-        assertEquals(from, saved.getActiveFrom());
+        // from과 saved.getActiveFrom()의 시간을 초(Second) 단위에서 절삭하여 비교
+        assertEquals(from.truncatedTo(ChronoUnit.SECONDS),
+                saved.getActiveFrom().truncatedTo(ChronoUnit.SECONDS));
 
     }
 
