@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
+
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
@@ -23,11 +24,20 @@ repositories {
     mavenCentral()
 }
 
+// 프로젝트의 모든 의존성을 대상으로 버전 충돌 해결 규칙을 정합니다.
+configurations.all {
+    resolutionStrategy {
+        // 다른 라이브러리가 어떤 버전을 가져오든, 무조건 gson은 2.10.1 버전을 사용하도록 강제합니다.
+        force 'com.google.code.gson:gson:2.10.1'
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
-    implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
+    implementation "org.redisson:redisson-spring-boot-starter:3.20.0"
+
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     compileOnly 'org.projectlombok:lombok'
@@ -36,7 +46,14 @@ dependencies {
     implementation 'com.mysql:mysql-connector-j:8.0.33'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Testcontainers
+    testImplementation platform("org.testcontainers:testcontainers-bom:1.20.1")
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+
+    // ✅ Spring Boot ↔ Testcontainers 자동 연결 (@ServiceConnection)
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 }
 
 tasks.named('test') {
