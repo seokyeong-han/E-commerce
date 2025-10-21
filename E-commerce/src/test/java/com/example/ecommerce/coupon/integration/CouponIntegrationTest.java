@@ -1,7 +1,5 @@
 package com.example.ecommerce.coupon.integration;
 
-import com.example.ecommerce.config.TestRedissonConfig;
-
 import com.example.ecommerce.coupon.application.dto.CreateCouponRequest;
 import com.example.ecommerce.coupon.domain.model.DiscountType;
 import com.fasterxml.jackson.databind.ObjectMapper;
