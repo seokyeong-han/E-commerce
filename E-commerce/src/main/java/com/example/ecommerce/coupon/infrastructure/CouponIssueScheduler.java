@@ -33,6 +33,8 @@ public class CouponIssueScheduler {
                 Long couponId = Long.parseLong(parts[0]);
                 Long userId = Long.parseLong(parts[1]);
 
+                //실제 발급 처리
+                couponFacade.processCouponIssuance(couponId, userId);
             }catch (Exception e){
                 //개별 요청 처리 중 실패 시 처리
                 //여기서 실패 해도 for문은 멈추지 않고 계속 다음 요청 처리
